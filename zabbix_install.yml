@@ -1,0 +1,21 @@
+---
+- hosts: osis-prod-app3
+  gather_facts: False
+  become: yes
+  serial: 1
+  tasks:
+  
+  - name: 1 config providing
+    template:
+      src: zabbix_agentd.conf.j2
+      dest: "/etc/zabbix/zabbix_agentd.conf"
+      mode: '0755'
+      force: yes
+
+  - name: 2 starting && enabling
+    service:
+      name: zabbix-agent.service
+      state: restarted
+      enabled: yes
+
+    

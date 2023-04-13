@@ -1,0 +1,46 @@
+---
+- hosts: stage-app
+  gather_facts: False
+  become: yes
+  serial: 1
+  tasks:
+
+  - name: 1 copying rpm
+    copy:
+      src: ./zabbix-agent2-6.0.4-1.el7.x86_64.rpm
+      dest: /tmp/zabbix-agent2-6.0.4-1.el7.x86_64.rpm
+      mode: '0764'
+#      owner: "{{item.owner}}"
+#      group: "{{item.group}}"
+#    with_items:
+#      - {src: '/mnt/c/Users/haritonos/Documents/ansible/playbook/zabbix_install/zabbix-agent2-6.0.12-release1.el7.x86_64.rpm', dest: '/home/hariton/zabbix-agent2-6.0.4-1.el7.x86_64.rpm', mode: '0751', owner: 'root', group: 'root'}
+#      - {src: '/mnt/c/Users/haritonos/Documents/minio/mc', dest: '/usr/local/bin/mcli', mode: '0751', owner: 'minio', group: 'minio'}
+
+  - name: 2 installing zabbix2
+    yum:
+      name: /tmp/zabbix-agent2-6.0.4-1.el7.x86_64.rpm
+      state: present
+  
+
+  - name: 3 copying UserParameter
+    copy:
+      src: ./userparameter_custom.conf
+      dest: /etc/zabbix/zabbix_agent2.d/userparameter_custom.conf
+      mode: '0440'
+      owner: zabbix
+      group: zabbix
+
+  - name: 4 config providing
+    template:
+      src: zabbix_agent2.conf.j2
+      dest: "/etc/zabbix/zabbix_agent2.conf"
+      mode: '0755'
+      force: yes
+
+  - name: 5 restarting && enabling
+    service:
+      name: zabbix-agent2.service
+      state: restarted
+      enabled: yes
+
+    
